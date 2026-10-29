@@ -1,6 +1,6 @@
 # VBIS-Chapter3-SQL
 
-**Ad Soyad:** ADINIZI VƏ SOYADINIZI BURA YAZIN
+**Ad Soyad:** Nurlan Nəzərov
 **Qrup:** KOM24B
 **Chapter 3 Practice Assignment** — SQL sorğuları və GitHub portfoliosu
 
@@ -30,7 +30,8 @@ VBIS-Chapter3-SQL
 ├── mandatory_queries.sql
 ├── additional_queries.sql
 ├── explanation.md
-├── schema_and_sample_data.sql   # sorğuları yoxlamaq üçün sxem + test məlumatları
+├── university_schema.sql        # universitet sxemi + test məlumatları
+├── bank_schema.sql              # bank sxemi + test məlumatları
 └── screenshots/                 # sorğuların icrası, nəticələr, PostgreSQL mühiti
 ```
 
@@ -38,11 +39,10 @@ VBIS-Chapter3-SQL
 
 ```bash
 createdb vbis_ch3
-psql -d vbis_ch3 -f schema_and_sample_data.sql   # cədvəllər + test məlumatları
+psql -d vbis_ch3 -f university_schema.sql
+psql -d vbis_ch3 -f bank_schema.sql
 psql -d vbis_ch3 -f mandatory_queries.sql
 psql -d vbis_ch3 -f additional_queries.sql
 ```
 
-`schema_and_sample_data.sql` faylında kitabın universitet (university) və bank (banking)
-sxemləri PostgreSQL üçün uyğunlaşdırılıb və hər sorğunun nəticə verməsi üçün kiçik test
-məlumatları əlavə edilib.
+`university_schema.sql` və `bank_schema.sql` fayllarında kitabın universitet və bank sxemləri PostgreSQL üçün uyğunlaşdırılıb, sorğuların nəticə verməsi üçün kiçik test məlumatları əlavə edilib.

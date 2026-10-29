@@ -4,42 +4,38 @@
 
 ## 1. Ən çətin hesab etdiyim SQL sorğusu hansı oldu?
 
-Ən çətin sorğu **3.15(a)** oldu: "Brooklyn-də yerləşən *hər bir* filialda hesabı olan müştərilər".
-Burada "ən azı bir filialda" yox, "bütün filiallarda" şərti var, yəni relyasion bölmə (division)
-məsələsidir. SQL-də birbaşa "for all" operatoru olmadığı üçün `NOT EXISTS (... EXCEPT ...)`
-üsulundan istifadə etdim: Brooklyn filialları çoxluğundan müştərinin hesabı olan filialları
-çıxırıq. Fərq boş çoxluqdursa, deməli müştərinin hər filialda hesabı var. Eyni məntiqi
-3.28-də də ("öz departamentindəki bütün kursları tədris edən müəllimlər") tətbiq etdim.
+Mənim üçün ən çətini 3.15(a) oldu: "Brooklyn-də yerləşən hər bir filialda hesabı olan müştərilər".
+Əvvəlcə sadə bir JOIN yazıb işi bitirdim sandım, amma nəticədə Brooklyn-də yalnız bir filialda
+hesabı olan müştərilər də çıxdı. Sonra başa düşdüm ki, sualda "ən azı bir" yox, "hər bir" sözü
+var və bu, başqa məntiq tələb edir. SQL-də "hamısı üçün" deyə hazır operator olmadığı üçün
+`NOT EXISTS` ilə `EXCEPT` birləşdirdim: Brooklyn filiallarının siyahısından müştərinin hesabı
+olan filialları çıxırıq, əgər heç nə qalmırsa, deməli müştəri hamısında hesab açıb. Eyni üsulu
+3.28-də də işlətdim.
 
 ## 2. Hansı sorğu üçün alt sorğu (subquery) istifadə etdim?
 
-Alt sorğunu bir neçə tapşırıqda işlətdim:
+Bir neçə yerdə işlətdim. 3.11(b)-də 2017-dən əvvəl kurs götürənlərin ID-lərini alt sorğu ilə
+tapıb `NOT IN` ilə kənarlaşdırdım. 3.25-də Philosophy departamentinin büdcəsini alt sorğu ilə
+götürüb digər departamentlərlə müqayisə etdim. Ən çox 3.11(d)-də lazım oldu: orada əvvəlcə hər
+departamentin maksimum maaşını tapmaq, sonra onların ən kiçiyini seçmək lazım idi. `MIN(MAX(...))`
+yazmaq mümkün olmadığı üçün birinci hesablamanı `FROM` içində alt sorğu kimi yazdım.
+3.35-də isə `WITH` ilə bölmələrin tələbə sayını ayrıca hesablayıb, `MAX` ilə müqayisə etdim.
 
-- **3.11(b)** — `NOT IN (SELECT ID FROM takes WHERE year < 2017)`: 2017-dən əvvəl kurs almış
-  tələbələri alt sorğu ilə tapıb xaric etdim.
-- **3.11(d)** — `FROM` bəndində alt sorğu: əvvəlcə hər departamentin maksimum maaşını hesabladım,
-  sonra onların arasından `MIN` götürdüm. Aqreqat funksiyanın üstündə birbaşa aqreqat yazmaq
-  olmadığı üçün bu üsul lazım idi.
-- **3.25** — skalyar alt sorğu ilə Philosophy departamentinin büdcəsini əldə edib müqayisə etdim.
-- **3.35** — `WITH` ilə müvəqqəti nəticə yaradıb, `MAX(num)` üçün skalyar alt sorğu işlətdim.
+## 3. JOIN istifadə etdiyim bir nümunəni izah edin
 
-## 3. JOIN istifadə etdiyim bir nümunə
-
-**3.24**-də üç cədvəli birləşdirdim: `student`, `advisor` və `instructor`.
-`student.ID = advisor.s_ID` şərti ilə tələbəni onun məsləhətçisinə, sonra
-`advisor.i_ID = instructor.ID` şərti ilə məsləhətçini müəllim məlumatlarına bağladım. Bundan
-sonra `WHERE` ilə tələbənin departamentinin Accounting, müəllimin departamentinin isə Physics
-olduğunu yoxladım. Tələbə və müəllim fərqli departamentləri təmsil etdiyi üçün
-`student.dept_name` və `instructor.dept_name` sütunlarını ayrı-ayrı alias ilə fərqləndirmək
-vacib idi.
+3.24 JOIN-in yaxşı nümunəsidir. Tələbənin adı `student` cədvəlindədir, onun məsləhətçisi
+`advisor` cədvəlindədir, məsləhətçinin departamenti isə `instructor` cədvəlindədir. Yəni üç
+cədvəli zəncir kimi bağlamaq lazım idi: `student.ID = advisor.s_ID`, sonra
+`advisor.i_ID = instructor.ID`. Bundan sonra `WHERE` ilə tələbənin departamentinin Accounting,
+müəllimin departamentinin Physics olduğunu yoxladım. Hər iki cədvəldə `dept_name` sütunu
+olduğu üçün qarışmasın deyə `s` və `i` alias-larından istifadə etdim.
 
 ## 4. Qarşılaşdığım problem və onun həlli
 
-Ən çox problem **NULL qiymətlərlə** bağlı oldu (3.31 və 3.32). Əvvəlcə "A qiyməti verməyən
-müəllimlər" üçün `grade <> 'A'` kimi yazmağa çalışdım, amma qiyməti `NULL` olan sətirlərdə
-müqayisə `unknown` verir və həmin sətirlər itirilir. Bundan əlavə, `NOT IN` alt sorğusunda
-`NULL` olarsa, bütün nəticə boş çıxa bilər. Həlli: "heç vaxt A verməyən" şərtini
-`NOT EXISTS` ilə, "ən azı bir qeyri-null qiymət" şərtini isə `EXISTS ... grade IS NOT NULL`
-ilə yazdım. Test məlumatlarında qiyməti `NULL` olan bir tələbə əlavə edib yoxladım:
-həmin tələbənin müəllimi 3.31-də görünür, amma 3.32-də görünmür, yəni sorğu gözlədiyim kimi
-işləyir.
+Ən çox vaxtımı NULL dəyərlər apardı (3.31 və 3.32). "A qiyməti verməyən müəllimlər" üçün ilk
+ağlıma gələn `grade <> 'A'` oldu, amma qiyməti NULL olan sətirlərdə bu müqayisə nə doğru, nə də
+yalan olur, nəticədə həmin sətirlər sadəcə itir. `NOT IN` də alt sorğuda NULL olarsa, gözlənilməz
+şəkildə boş nəticə verə bilər. Buna görə `NOT EXISTS` ilə yazdım, 3.32-də isə qeyri-null qiymət
+şərtini `IS NOT NULL` ilə ayrıca yoxladım. Sonra test məlumatlarına qiyməti NULL olan bir tələbə
+əlavə etdim və yoxladım: onun müəllimi 3.31-də görünür, 3.32-də görünmür. Bu, mənim üçün NULL-un
+SQL-də necə davrandığını başa düşməyə kömək etdi.
