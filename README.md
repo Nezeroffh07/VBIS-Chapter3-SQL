@@ -1,6 +1,6 @@
 # VBIS-Chapter3-SQL
 
-**Ad Soyad:** ADINIZI VƏ SOYADINIZI BURA YAZIN
+**Ad Soyad:** Nurlan Nəzərov
 **Qrup:** KOM24B
 **Chapter 3 Practice Assignment** — SQL sorğuları və GitHub portfoliosu
 
